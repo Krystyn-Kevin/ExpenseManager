@@ -48,6 +48,7 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
   transition: background 0.3s, color 0.3s;
+  display: none;
 }
 body::before {
   content: '';
@@ -557,26 +558,6 @@ canvas { max-height:230px; }
 <div class="toast" id="toast"></div>
 
 <script>
-//=== FIREBASE CONNECTION =========
-const firebaseConfig = {
-  apiKey: "AIzaSyCPlB-HjpQPfBQbkvH8gApsyBY-ju5l2G4",
-  authDomain: "expense-manager-d42e0.firebaseapp.com",
-  projectId: "expense-manager-d42e0",
-  storageBucket: "expense-manager-d42e0.firebasestorage.app",
-  messagingSenderId: "257056491274",
-  appId: "1:257056491274:web:3e9f87abd76150bc1ddcf3",
-  measurementId: "G-BQ68EJ5ZLN"
-};
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-  
-auth.onAuthStateChanged(user => {
-  if (!user) {
-    window.location.href = "login.html";
-  } else {
-    console.log("Logged in:", user.email);
-  }
-});
 // ══ STORAGE KEYS ════════════════════════════════════════════════
 const S_EXP   = 'spendex_v1';
 const S_CATS  = 'spendex_cats_v3';
@@ -1272,10 +1253,37 @@ function showToast(msg){
   t.textContent=msg; t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),2200);
 }
+//=== FIREBASE CONNECTION =========
+const firebaseConfig = {
+    apiKey: "AIzaSyCPlB-HjpQPfBQbkvH8gApsyBY-ju5l2G4",
+    authDomain: "expense-manager-d42e0.firebaseapp.com",
+    projectId: "expense-manager-d42e0",
+    storageBucket: "expense-manager-d42e0.appspot.com",
+    messagingSenderId: "777494191910",
+    appId: "1:777494191910:web:4860b0e50889ec703901b0"
+};
 
-// ══ BOOT ═════════════════════════════════════════════════════════
-renderCatGrid();
-renderRecent();
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+
+// This replaces your old onAuthStateChanged and the "BOOT" section
+auth.onAuthStateChanged(user => {
+  if (!user) {
+    // If not logged in, send to login page
+    window.location.replace("login.html");
+  } else {
+    // If logged in:
+    // 1. Show the page
+    document.body.style.display = "block";
+    
+    // 2. Run your initialization functions
+    renderCatGrid();
+    renderRecent();
+    
+    console.log("Logged in as:", user.email);
+  }
+});
+// inside the 'else' block so they don't run until the user is confirmed.
 </script>
 </body>
 </html>
