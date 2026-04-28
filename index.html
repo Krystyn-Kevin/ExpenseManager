@@ -7,6 +7,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+//=== FIREBASE CDN =========
+<script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-auth-compat.js"></script>
 <style>
 /* ── THEME TOKENS ──────────────────────────────────────────── */
 [data-theme="dark"] {
@@ -555,6 +558,37 @@ canvas { max-height:230px; }
 <div class="toast" id="toast"></div>
 
 <script>
+//=== FIREBASE CONNECTION =========
+const firebaseConfig = {
+  apiKey: "AIzaSyCPlB-HjpQPfBQbkvH8gApsyBY-ju5l2G4",
+  authDomain: "expense-manager-d42e0.firebaseapp.com",
+  projectId: "expense-manager-d42e0",
+  storageBucket: "expense-manager-d42e0.firebasestorage.app",
+  messagingSenderId: "257056491274",
+  appId: "1:257056491274:web:3e9f87abd76150bc1ddcf3",
+  measurementId: "G-BQ68EJ5ZLN"
+};
+//=== FIREBASE LOGIN ===============
+function signUp(email, password){
+  return auth.createUserWithEmailAndPassword(email, password);
+}
+
+function login(email, password){
+  return auth.signInWithEmailAndPassword(email, password);
+}
+
+function logout(){
+  return auth.signOut();
+}
+//==== LOGIN STATE ========
+auth.onAuthStateChanged(user => {
+  if(user){
+    console.log("Logged in:", user.email);
+  } else {
+    console.log("Not logged in");
+  }
+});
+
 // ══ STORAGE KEYS ════════════════════════════════════════════════
 const S_EXP   = 'spendex_v1';
 const S_CATS  = 'spendex_cats_v3';
