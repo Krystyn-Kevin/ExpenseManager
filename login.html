@@ -17,15 +17,15 @@
 <button onclick="login()">Login</button>
 
 <script>
+   firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  
   const firebaseConfig = {
     apiKey: "AIzaSyCPlB-HjpQPfBQbkvH8gApsyBY-ju5l2G4",
     authDomain: "expense-manager-d42e0.firebaseapp.com",
     projectId: "expense-manager-d42e0"
   };
-
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-
+  
   function login(){
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
