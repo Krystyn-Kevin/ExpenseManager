@@ -9,6 +9,8 @@
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore-compat.js"></script>
+
 <style>
 /* ── THEME TOKENS ──────────────────────────────────────────── */
 [data-theme="dark"] {
@@ -586,7 +588,50 @@ let currentPeriod  = 'daily';
 let periodOffset   = 0;
 let pieChart       = null;
 
-function saveExpenses() { localStorage.setItem(S_EXP,  JSON.stringify(expenses)); }
+// --- Firestone Online Storage -----------
+// 1. Initialize Firestore
+const db = firebase.firestore();
+
+// 2. Modified Add Expense function (Saves to Cloud)
+function addExpense() {
+  const amount = parseFloat(document.getElementById('inp-amount').value);
+  const date = getInputDate();
+  const note = document.getElementById('inp-note').value.trim();
+  const user = auth.currentUser;
+
+  if (!user) return showToast("Not logged in!");
+  if (!amount || !date || !selectedCat) return showToast("Fill all fields");
+
+  // Save to Firestore under the user's specific ID
+  db.collection("users").doc(user.uid).collection("expenses").add({
+    amount: amount,
+    date: date,
+    cat: selectedCat,
+    note: note,
+    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+  })
+  .then(() => {
+    showToast("Synced to Cloud!");
+    document.getElementById('inp-amount').value = '';
+    document.getElementById('inp-note').value = '';
+    selectedCat = '';
+    renderCatGrid();
+    // We don't need to call renderRecent() manually; 
+    // we will set up a real-time listener below.
+  })
+  .catch(err => console.error("Error saving:", err));
+}
+
+// 3. Real-time Listener (Syncs UI with Cloud automatically)
+function listenForExpenses(uid) {
+  db.collection("users").doc(uid).collection("expenses")
+    .orderBy("timestamp", "desc")
+    .onSnapshot((snapshot) => {
+      expenses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      renderRecent();
+      if (currentView === 'analytics') renderAnalytics();
+    });
+}
 function saveCats()     { localStorage.setItem(S_CATS, JSON.stringify(cats));     }
 function getCatColor(n) { const c=cats.find(c=>c.name===n); return c?c.color:'#c8f55a'; }
 function getCatIcon(n)  { const c=cats.find(c=>c.name===n); return c?c.icon:'🏷'; }
@@ -1279,18 +1324,15 @@ const auth = firebase.auth();
 // This replaces your old onAuthStateChanged and the "BOOT" section
 auth.onAuthStateChanged(user => {
   if (!user) {
-    // If not logged in, send to login page
     window.location.replace("login.html");
   } else {
-    // If logged in:
-    // 1. Show the page
     document.body.style.display = "block";
-    
-    // 2. Run your initialization functions
     renderCatGrid();
-    renderRecent();
     
-    console.log("Logged in as:", user.email);
+    // Start listening to the Cloud Database for this specific user
+    listenForExpenses(user.uid);
+  }
+});
   }
 });
 // inside the 'else' block so they don't run until the user is confirmed.
