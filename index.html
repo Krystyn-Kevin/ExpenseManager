@@ -1321,19 +1321,19 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 
-// This replaces your old onAuthStateChanged and the "BOOT" section
+// The Gatekeeper logic
 auth.onAuthStateChanged(user => {
   if (!user) {
     window.location.replace("login.html");
   } else {
+    // Show the page
     document.body.style.display = "block";
     renderCatGrid();
     
-    // Start listening to the Cloud Database for this specific user
+    // Start listening to the Cloud Database
     listenForExpenses(user.uid);
   }
-})
-// inside the 'else' block so they don't run until the user is confirmed.
+});
 </script>
 </body>
 </html>
