@@ -580,6 +580,7 @@ const CUSTOM_PALETTE = ['#c8f55a','#5af5f5','#f5a05a','#a05af5','#f55af5','#5af5
 // ══ STATE ════════════════════════════════════════════════════════
 let expenses = JSON.parse(localStorage.getItem(S_EXP)  || '[]');
 let cats     = JSON.parse(localStorage.getItem(S_CATS) || 'null') || DEFAULTS.map(d=>({...d}));
+let currentView = 'add'; 
 
 // analytics state
 let selectedCat    = '';          // add-form selected cat
@@ -629,9 +630,13 @@ function listenForExpenses(uid) {
     .onSnapshot((snapshot) => {
       expenses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       renderRecent();
+      // Use the correct variable name here
       if (currentView === 'analytics') renderAnalytics();
+    }, (error) => {
+      console.error("Firestore Error:", error);
     });
 }
+
 function saveCats()     { localStorage.setItem(S_CATS, JSON.stringify(cats));     }
 function getCatColor(n) { const c=cats.find(c=>c.name===n); return c?c.color:'#c8f55a'; }
 function getCatIcon(n)  { const c=cats.find(c=>c.name===n); return c?c.icon:'🏷'; }
@@ -660,6 +665,7 @@ function toggleTheme(){
 
 // ══ NAVIGATION ════════════════════════════════════════════════════
 function switchView(v,btn){
+  currentView = v; 
   document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(el=>el.classList.remove('active'));
   document.getElementById('view-'+v).classList.add('active');
