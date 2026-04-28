@@ -603,7 +603,7 @@ function addExpense() {
   if (!user) return showToast("Not logged in!");
   if (!amount || !date || !selectedCat) return showToast("Fill all fields");
 
-  // Save to Firestore under the user's specific ID
+  // Save ONLY to Firestore (Firebase handles the sync to UI)
   db.collection("users").doc(user.uid).collection("expenses").add({
     amount: amount,
     date: date,
@@ -617,23 +617,32 @@ function addExpense() {
     document.getElementById('inp-note').value = '';
     selectedCat = '';
     renderCatGrid();
-    // We don't need to call renderRecent() manually; 
-    // we will set up a real-time listener below.
   })
-  .catch(err => console.error("Error saving:", err));
+  .catch(err => {
+    console.error("Error saving:", err);
+    showToast("Sync failed!");
+  });
 }
-
 // 3. Real-time Listener (Syncs UI with Cloud automatically)
 function listenForExpenses(uid) {
   db.collection("users").doc(uid).collection("expenses")
     .orderBy("timestamp", "desc")
     .onSnapshot((snapshot) => {
+      // Map the cloud data to your expenses array
       expenses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      
+      // Update the UI
       renderRecent();
-      // Use the correct variable name here
-      if (currentView === 'analytics') renderAnalytics();
+      
+      // Fixed variable name check
+      if (currentView === 'analytics') {
+          renderAnalytics();
+      }
     }, (error) => {
-      console.error("Firestore Error:", error);
+      console.error("Firestore Listener Error:", error);
+      if(error.code === "permission-denied") {
+          alert("Security Rule Error: Check your Firebase Console Rules!");
+      }
     });
 }
 
