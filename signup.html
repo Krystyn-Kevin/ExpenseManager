@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sign Up - Spendex</title>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+</head>
+<body>
+
+    <div id="signup-container">
+        <h2>Create Account</h2>
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="password" placeholder="Password (min 6 chars)">
+        
+        <button onclick="handleSignup()">Sign Up</button>
+        
+        <p>Already have an account? <a href="login.html">Login here</a></p>
+    </div>
+
+<script>
+    // 1. Your Firebase Config (Keep this identical to index.html)
+    const firebaseConfig = {
+        apiKey: "AIzaSyCPlB-HjpQPfBQbkvH8gApsyBY-ju5l2G4",
+        authDomain: "expense-manager-d42e0.firebaseapp.com",
+        projectId: "expense-manager-d42e0",
+        storageBucket: "expense-manager-d42e0.appspot.com",
+        messagingSenderId: "777494191910",
+        appId: "1:777494191910:web:4860b0e50889ec703901b0"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    // 2. Signup Logic
+    function handleSignup() {
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+
+        if (password.length < 6) {
+            alert("Password must be at least 6 characters.");
+            return;
+        }
+
+        // Set session persistence so it logs out when browser closes
+        auth.setPersistence(firebase.auth.Auth.Persistence.SESSION)
+            .then(() => {
+                return auth.createUserWithEmailAndPassword(email, password);
+            })
+            .then((userCredential) => {
+                alert("Welcome to Spendex!");
+                window.location.replace("index.html");
+            })
+            .catch((error) => {
+                alert("Error: " + error.message);
+            });
+    }
+</script>
+</body>
+</html>
