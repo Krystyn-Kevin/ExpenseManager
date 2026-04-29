@@ -12,9 +12,10 @@
 
   <button onclick="login()">Login</button>
   <button onclick="goToSignup()">Sign Up</button>
+  
+  <hr> <button onclick="googleLogin()" style="background-color: #4285F4; color: white;">Sign in with Google</button>
 
 <script>
- // 1. Firebase Config (Keep this identical to your other files)
 const firebaseConfig = {
     apiKey: "AIzaSyCPlB-HjpQPfBQbkvH8gApsyBY-ju5l2G4",
     authDomain: "expense-manager-d42e0.firebaseapp.com",
@@ -27,7 +28,21 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 
-// 2. The Login Function
+// ADD THIS FOR GOOGLE PROVIDER
+const provider = new firebase.auth.GoogleAuthProvider();
+
+// NEW GOOGLE LOGIN FUNCTION
+function googleLogin() {
+    auth.signInWithPopup(provider)
+        .then((result) => {
+            // Success! Redirect to index.html
+            window.location.replace("index.html");
+        })
+        .catch((err) => {
+            alert("Google Login Failed: " + err.message);
+        });
+}
+
 function login() {
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
@@ -37,7 +52,6 @@ function login() {
         return;
     }
 
-    // Set persistence to SESSION (logs out when tab/browser closes)
     auth.setPersistence(firebase.auth.Auth.Persistence.SESSION)
         .then(() => {
             return auth.signInWithEmailAndPassword(email, password);
@@ -48,7 +62,6 @@ function login() {
         .catch(err => alert("Login Failed: " + err.message));
 }
 
-// 3. The Redirection Function (This fixes your "Sign Up" click issue)
 function goToSignup() {
     window.location.href = "signup.html";
 }
